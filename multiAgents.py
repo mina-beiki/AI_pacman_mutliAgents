@@ -86,9 +86,9 @@ class ReflexAgent(Agent):
         closestGhostDist = manhattanDistance(newPos, closestGhostPos)
 
         if action == 'Stop':
-            evalValue = successorGameState.getScore() + closestGhostDist/(closestFood*100) - 50
+            evalValue = successorGameState.getScore() + (closestGhostDist*0.1)/(closestFood*100) - 100
         else:
-            evalValue = successorGameState.getScore() + closestGhostDist / (closestFood * 100)
+            evalValue = successorGameState.getScore() + (closestGhostDist*0.1) / (closestFood * 100)
 
         return evalValue
 
@@ -154,7 +154,48 @@ class MinimaxAgent(MultiAgentSearchAgent):
         Returns whether or not the game state is a losing state
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        #util.raiseNotDefined()
+
+        def minimax(gameState, agentIndex, depth=0):
+            bestAction = None
+            # if we have reached a terminal state:
+            if (depth == self.depth) or gameState.isWin() or gameState.isLose():
+                return [self.evaluationFunction(gameState)]
+            elif agentIndex == (gameState.getNumAgents() - 1):  # if we have checked all agents
+                depth += 1
+                childAgentIndex = self.index
+            else:
+                childAgentIndex = agentIndex + 1
+            # MAX:
+            if agentIndex == 0:  # because pacman agent is the max agent and first row in tree
+                # initiliaze it to minus infinite:
+                max = -float("inf")
+                legalActions = gameState.getLegalActions(agentIndex)
+                for action in legalActions:
+                    succState = gameState.generateSuccessor(agentIndex, action)
+                    maxNew = minimax(succState, childAgentIndex, depth)[0]
+                    if maxNew >= max:
+                        max = maxNew
+                        bestAction = action
+                return max, bestAction
+            # MIN:
+            else:
+                # initiliaze it to positive infinite:
+                min = float("inf")
+                legalActions = gameState.getLegalActions(agentIndex)
+                for action in legalActions:
+                    succState = gameState.generateSuccessor(agentIndex, action)
+                    minNew = minimax(succState, childAgentIndex, depth)[0]
+                    if minNew <= min:
+                        min = minNew
+                        bestAction = action
+            return min, bestAction
+
+        result = minimax(gameState, self.index)
+        bestScore = result[0]
+        bestMove = result[1]
+        return bestMove
+
 
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
@@ -167,7 +208,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         Returns the minimax action using self.depth and self.evaluationFunction
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        #util.raiseNotDefined()
 
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
