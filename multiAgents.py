@@ -78,17 +78,25 @@ class ReflexAgent(Agent):
         #calculate all food distances:
         foodDists = [ manhattanDistance(newPos, foodPos) for foodPos in foodsPoses]
         #find closest food
-        if len(foodDists)==0:
-            return 0
-
-        closestFood = min(foodDists)
         closestGhostPos = newGhostStates[0].configuration.pos
         closestGhostDist = manhattanDistance(newPos, closestGhostPos)
+        newScore = successorGameState.getScore()
+        currScore = scoreEvaluationFunction(currentGameState)
+        newFoodNum = successorGameState.getNumFood()
+        difference = newScore - currScore
+        shortestScaredTime = min(newScaredTimes)
 
-        if action == 'Stop':
-            evalValue = successorGameState.getScore() + (closestGhostDist*0.1)/(closestFood*100) - 100
+        if len(foodDists)==0:
+            closestFood = 0
         else:
-            evalValue = successorGameState.getScore() + (closestGhostDist*0.1) / (closestFood * 100)
+            closestFood = min(foodDists)
+
+        if shortestScaredTime!=0:
+            closestGhostDist = -closestGhostDist*3
+        if action == 'Stop':
+            evalValue = 1/closestFood
+        else:
+            evalValue = (10/(closestFood+1)) + (closestGhostDist/10) + difference + (10/(newFoodNum+1))
 
         return evalValue
 
