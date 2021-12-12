@@ -209,6 +209,54 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         """
         "*** YOUR CODE HERE ***"
         #util.raiseNotDefined()
+        agentIndex = 0
+
+        def max_value(state, depth, alpha, beta):
+            maxScore = float("-inf")
+            # check end:
+            if state.isWin() or state.isLose():
+                return state.getScore()
+            actions = state.getLegalActions(agentIndex)
+            score = maxScore
+            bestAction = Directions.STOP
+            for action in actions:
+                score = min_value(state.generateSuccessor(agentIndex, action), depth, 1, alpha, beta)
+                if score > maxScore:
+                    maxScore = score
+                    bestAction = action
+                alpha = max(alpha, maxScore)
+                if maxScore > beta:
+                    return maxScore
+            if depth == 0:
+                return bestAction
+            else:
+                return maxScore
+
+        def min_value(state, depth, ghost, alpha, beta):
+            if state.isLose() or state.isWin():
+                return state.getScore()
+            nextGhost = ghost + 1
+            if ghost == state.getNumAgents() - 1:
+                nextGhost = agentIndex
+            actions = state.getLegalActions(ghost)
+            minScore = float("inf")
+            score = minScore
+            for action in actions:
+                if nextGhost == agentIndex:
+                    if depth == self.depth - 1:
+                        score = self.evaluationFunction(state.generateSuccessor(ghost, action))
+                    else:
+                        score = max_value(state.generateSuccessor(ghost, action), depth + 1, alpha, beta)
+                else:
+                    score = min_value(state.generateSuccessor(ghost, action), depth, nextGhost, alpha, beta)
+                if score < minScore:
+                    minScore = score
+                beta = min(beta, minScore)
+                if minScore < alpha:
+                    return minScore
+            return minScore
+
+        return max_value(gameState, 0, float("-inf"), float("inf"))
 
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
